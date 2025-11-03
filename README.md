@@ -1,7 +1,7 @@
-# Overall-and-Serotype-Specific-Dengue-Transmission-Trends-in-Mexico
+# Changes in dengue virus transmission in Mexico: 2016-2023
 
 This repository includes .rds files containing the data used to run the catalytic models used in the paper 
-"Overall and Serotype-Specific Dengue Transmission Trends in Mexico, 2016-2023", 
+"Changes in dengue virus transmission in Mexico: 2016-2023", 
 an R script ("Code to run models.r") showing how to run the models for given states in Mexico, 
 and .STAN files of the three models which appear in theResults section of the paper. These models are:
 
