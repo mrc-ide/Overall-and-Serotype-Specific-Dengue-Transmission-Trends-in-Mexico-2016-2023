@@ -4,14 +4,16 @@ library(tidyverse)
 
 #Case data
 
-mex_cases_age_state_no0 <- readRDS("all_case_data.rds")
+mex_cases_age_state_no0 <- readRDS("Mexico dengue data/all_case_data.rds")
 
 mex_cases_mat_no0 <- as.matrix(mex_cases_age_state_no0[, 3:18])
 mex_states_order <- unique(mex_cases_age_state_no0[, 2])
 
 #Pop data
 
-mex_pop_age_state_no0 <- readRDS("pop_data.rds")
+mex_pop_age_state_no0 <- readRDS("Mexico dengue data/pop_data.rds") %>%
+  mutate(NOM_ENT = ifelse(NOM_ENT == "ciudad de m'exico", "distrito federal", NOM_ENT)) %>%
+  arrange(NOM_ENT, Year)
 
 mex_pop_mat_no0 <- as.matrix(mex_pop_age_state_no0[, 3:18])
 
@@ -89,7 +91,9 @@ mex_states_order <- unique(mex_cases_age_state_no0[, 2])
 
 #Pop data
 
-mex_pop_age_state_no0 <- readRDS("pop_data.rds")
+mex_pop_age_state_no0 <- mex_pop_age_state_no0 <- readRDS("Mexico dengue data/pop_data.rds") %>%
+  mutate(NOM_ENT = ifelse(NOM_ENT == "ciudad de m'exico", "distrito federal", NOM_ENT)) %>%
+  arrange(NOM_ENT, Year)
 
 mex_pop_mat_no0 <- as.matrix(mex_pop_age_state_no0[, 3:18])
 
@@ -261,7 +265,9 @@ cases <- array(unlist(cases_array_seros), dim = c(nT*32, nA, 4))
 
 #Pop data
 
-mex_pop_age_state_no0 <- readRDS("pop_data.rds")
+mex_pop_age_state_no0 <- mex_pop_age_state_no0 <- readRDS("Mexico dengue data/pop_data.rds") %>%
+  mutate(NOM_ENT = ifelse(NOM_ENT == "ciudad de m'exico", "distrito federal", NOM_ENT)) %>%
+  arrange(NOM_ENT, Year)
 
 mex_pop_mat_no0 <- as.matrix(mex_pop_age_state_no0[, 3:18])
 
@@ -302,7 +308,7 @@ run_model_m6 <- function(state, cases, pop){
       } else if(state == 7){
         round(cases[((state - 1) * 8 + 2) : (state * 8), , ])
       } else{
-        round(cases[((state - 1) * 8 + 1) : (state * 8), , ])
+        round)
       },
       #case matrix
       pop = if(state %in% c(1, 9, 13, 22)){
@@ -478,9 +484,9 @@ run_model_m6 <- function(state, cases, pop){
   }
   
   
-  init_values <- list(list(report = c(0.25, 0.05)), 
-                      list(report = c(0.25, 0.05)), 
-                      list(report = c(0.25, 0.05)))
+  #init_values <- list(list(report = c(0.25, 0.05)), 
+   #                   list(report = c(0.25, 0.05)))
+   #                   list(report = c(0.25, 0.05)), 
   
   fit <- rstan::sampling(mod,
                          data = data,
@@ -488,8 +494,9 @@ run_model_m6 <- function(state, cases, pop){
                          iter = 6000, #number of iterations for each chain
                          warmup = 1000, #number of these iterations which are warmup
                          cores = 3, #run chains in parallel  
-                         refresh = 100,
-                         init = init_values)
+                         refresh = 100#,
+                       #  init = init_values
+                       )
   
   
   saveRDS(fit, file  = paste0("fit_output_m6_", state, ".rds"))
