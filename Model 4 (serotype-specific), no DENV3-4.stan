@@ -195,7 +195,7 @@ if(nT >= 2){
       }
     }
 
-  // Apply your conditional logic to ensure that the log likelihood never works with 0 but close (0.0001)
+   // Ensure the log likelihood not 0
 
   for (t in 1 : nT) 
 
