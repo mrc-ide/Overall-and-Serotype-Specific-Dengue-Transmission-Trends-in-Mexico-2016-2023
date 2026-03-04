@@ -1,4 +1,4 @@
-# Changes in dengue virus transmission in Mexico: 2016-2023
+# Overall and serotype-specific trends in dengue virus transmission in Mexico, 2016-2023
 
 This repository includes .rds files containing the data used to run the catalytic models used in the paper 
 "Changes in dengue virus transmission in Mexico: 2016-2023", 
