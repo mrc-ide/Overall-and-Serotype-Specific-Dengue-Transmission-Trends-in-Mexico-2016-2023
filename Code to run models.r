@@ -20,15 +20,15 @@ mex_pop_mat_no0 <- as.matrix(mex_pop_age_state_no0[, 3:18])
 
 #Run model
 
-mod_imai <- rstan::stan_model(file = "Model from Imai et al. 2016 (Model 1).stan")
+mod_m1 <- rstan::stan_model(file = "Model from Imai et al. 2016 (Model 1).stan")
 
 nT <- 8 #Number of years running model for
 nA <- ncol(mex_cases_mat_no0) #Number of age groups
 
-age_min_imai <- c(1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75) #Minimum age in age groups
-age_max_imai <- c(5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 119) #Maximum age in age groups
+age_min_m1 <- c(1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75) #Minimum age in age groups
+age_max_m1 <- c(5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 119) #Maximum age in age groups
 
-fit_imai <- vector(mode = "list", length = 32)
+fit_m1 <- vector(mode = "list", length = 32)
 
 for (i in seq(1, 32)[-c(2, 6, 29)]) {
   data <- list(
@@ -36,12 +36,12 @@ for (i in seq(1, 32)[-c(2, 6, 29)]) {
     nT = nT,
     cases = mex_cases_mat_no0[((i - 1) * 8 + 1):(i * 8), ],
     pop = mex_pop_mat_no0[((i - 1) * 8 + 1):(i * 8), ],
-    ageLims = rbind(age_min_imai, age_max_imai)
+    ageLims = rbind(age_min_m1, age_max_m1)
   )
   
   
-  fit_imai[[i]] <- rstan::sampling(
-    mod_imai,
+  fit_m1[[i]] <- rstan::sampling(
+    mod_m1,
     data = data,
     chains = 3,
     #number of chains
@@ -55,38 +55,38 @@ for (i in seq(1, 32)[-c(2, 6, 29)]) {
   )
 }
 
-chains_imai <- vector(mode = "list", length = 32)
-fit_summary_imai <- vector(mode = "list", length = 32)
-diagnostics_imai <- vector(mode = "list", length = 32)
+chains_m1 <- vector(mode = "list", length = 32)
+fit_summary_m1 <- vector(mode = "list", length = 32)
+diagnostics_m1 <- vector(mode = "list", length = 32)
 
 for (i in seq(1, 32)[-c(2, 6, 29)]) {
-  chains_imai[[i]] <- rstan::extract(fit_imai[[i]])
-  fit_summary_imai[[i]] <- rstan::summary(fit_imai[[i]])
-  diagnostics_imai[[i]] <- cbind(fit_summary_imai[[i]]$summary[, "Rhat"], fit_summary_imai[[i]]$summary[, "n_eff"])
+  chains_m1[[i]] <- rstan::extract(fit_m1[[i]])
+  fit_summary_m1[[i]] <- rstan::summary(fit_m1[[i]])
+  diagnostics_m1[[i]] <- cbind(fit_summary_m1[[i]]$summary[, "Rhat"], fit_summary_m1[[i]]$summary[, "n_eff"])
 }
 
 #Extract parameter posteriors
 
-rho_imai <- vector(mode = "list", length = 32)
-gamma1_imai <- vector(mode = "list", length = 32)
-lam_imai <- vector(mode = "list", length = 32)
-pars_imai <- vector(mode = "list", length = 32)
+rho_m1 <- vector(mode = "list", length = 32)
+gamma1_m1 <- vector(mode = "list", length = 32)
+lam_m1 <- vector(mode = "list", length = 32)
+pars_m1 <- vector(mode = "list", length = 32)
 
 for (i in seq(1, 31)[-c(2, 6, 29)]) {
-  rho_imai[[i]] <-
-    quantile(chains_imai[[i]]$rho, c(0.5, 0.025, 0.975))
-  gamma1_imai[[i]] <-
-    quantile(chains_imai[[i]]$gamma1, c(0.5, 0.025, 0.975))
-  lam_imai[[i]] <-
-    quantile(chains_imai[[i]]$lam, c(0.5, 0.025, 0.975))
-  pars_imai[[i]] <- rbind(rho_imai[[i]], gamma1_imai[[i]], lam_imai[[i]])
-  pars_imai[[i]] <- as.data.frame(pars_imai[[i]])
-  pars_imai[[i]]$pars <- c("rho", "gamma", "lam")
-  pars_imai[[i]]$ENTIDAD_RES <- rep(as.character(mex_states_order[i, ]), 3)
-  colnames(pars_imai[[i]]) <- c("med", "ciL", "ciU", "pars", "ENTIDAD_RES")
+  rho_m1[[i]] <-
+    quantile(chains_m1[[i]]$rho, c(0.5, 0.025, 0.975))
+  gamma1_m1[[i]] <-
+    quantile(chains_m1[[i]]$gamma1, c(0.5, 0.025, 0.975))
+  lam_m1[[i]] <-
+    quantile(chains_m1[[i]]$lam, c(0.5, 0.025, 0.975))
+  pars_m1[[i]] <- rbind(rho_m1[[i]], gamma1_m1[[i]], lam_m1[[i]])
+  pars_m1[[i]] <- as.data.frame(pars_m1[[i]])
+  pars_m1[[i]]$pars <- c("rho", "gamma", "lam")
+  pars_m1[[i]]$ENTIDAD_RES <- rep(as.character(mex_states_order[i, ]), 3)
+  colnames(pars_m1[[i]]) <- c("med", "ciL", "ciU", "pars", "ENTIDAD_RES")
 }
 
-pars_df_imai <- bind_rows(pars_imai)
+pars_df_m1 <- bind_rows(pars_m1)
 
 ## Running Model 5, based on O'Driscoll et al. 2019##
 
