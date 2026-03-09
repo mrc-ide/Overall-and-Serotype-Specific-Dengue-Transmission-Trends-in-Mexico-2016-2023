@@ -18,7 +18,7 @@ mex_pop_age_state_no0 <- readRDS("Mexico dengue data/pop_data.rds") %>%
 
 mex_pop_mat_no0 <- as.matrix(mex_pop_age_state_no0[, 3:18])
 
-#Run model
+#Run model 1 based on Imai et al. 2016
 
 mod_m1 <- rstan::stan_model(file = "Model from Imai et al. 2016 (Model 1).stan")
 
@@ -30,7 +30,7 @@ age_max_m1 <- c(5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 119) 
 
 fit_m1 <- vector(mode = "list", length = 32)
 
-for (i in seq(1, 32)[-c(2, 6, 29)]) {
+for (i in 30:30) {#for (i in seq(1, 31)[-c(2, 6, 29)]) { #Run the model for state 30 out of 32, which for us is Veracruz
   data <- list(
     nA = nA,
     nT = nT,
@@ -59,7 +59,7 @@ chains_m1 <- vector(mode = "list", length = 32)
 fit_summary_m1 <- vector(mode = "list", length = 32)
 diagnostics_m1 <- vector(mode = "list", length = 32)
 
-for (i in seq(1, 32)[-c(2, 6, 29)]) {
+for (i in 30:30) {#for (i in seq(1, 31)[-c(2, 6, 29)]) {
   chains_m1[[i]] <- rstan::extract(fit_m1[[i]])
   fit_summary_m1[[i]] <- rstan::summary(fit_m1[[i]])
   diagnostics_m1[[i]] <- cbind(fit_summary_m1[[i]]$summary[, "Rhat"], fit_summary_m1[[i]]$summary[, "n_eff"])
@@ -72,7 +72,7 @@ gamma1_m1 <- vector(mode = "list", length = 32)
 lam_m1 <- vector(mode = "list", length = 32)
 pars_m1 <- vector(mode = "list", length = 32)
 
-for (i in seq(1, 31)[-c(2, 6, 29)]) {
+for (i in 30:30) {#for (i in seq(1, 31)[-c(2, 6, 29)]) {
   rho_m1[[i]] <-
     quantile(chains_m1[[i]]$rho, c(0.5, 0.025, 0.975))
   gamma1_m1[[i]] <-
@@ -88,7 +88,7 @@ for (i in seq(1, 31)[-c(2, 6, 29)]) {
 
 pars_df_m1 <- bind_rows(pars_m1)
 
-## Running Model 5, based on O'Driscoll et al. 2019##
+## Running Model 2, based on O'Driscoll et al. 2019##
 
 #Case data
 
@@ -175,7 +175,11 @@ gamma_m2 <- vector(mode = "list", length = 32)
 rho_young_m2 <- vector(mode = "list", length = 32)
 gamma_young_m2 <- vector(mode = "list", length = 32)
 chi_m2 <- vector(mode = "list", length = 32)
-lam_H_m2 <- vector(mode = "list", length = 32)
+lam_H_1_m2 <- vector(mode = "list", length = 32)
+lam_H_2_m2 <- vector(mode = "list", length = 32)
+lam_H_3_m2 <- vector(mode = "list", length = 32)
+lam_H_4_m2 <- vector(mode = "list", length = 32)
+lam_H_5_m2 <- vector(mode = "list", length = 32)
 pars_m2 <- vector(mode = "list", length = 32)
 
 #for (i in seq(1, 31)[-c(2, 6, 29)]) { #this is all states
@@ -307,7 +311,7 @@ cases <- array(unlist(cases_array_seros), dim = c(nT * 32, nA, 4))
 
 #Pop data
 
-mex_pop_age_state_no0 <- mex_pop_age_state_no0 <- readRDS("Mexico dengue data/Mexico dengue data/pop_data.rds") %>%
+mex_pop_age_state_no0 <- mex_pop_age_state_no0 <- readRDS("Mexico dengue data/pop_data.rds") %>%
   mutate(NOM_ENT = ifelse(NOM_ENT == "ciudad de m'exico", "distrito federal", NOM_ENT)) %>%
   arrange(NOM_ENT, Year)
 
@@ -396,25 +400,7 @@ run_model_m4 <- function(state, cases, pop) {
   } else{
     dim(data$pop)[1]
   }
-  
-  if (model == "model_m6_c2_vh") {
-    data$first_year = if (state %in% c(1, 9, 13, 22)) {
-      8
-    } else if (state %in% c(3, 23, 31)) {
-      7
-    } else if (state == 26) {
-      6
-    } else if (state == 4) {
-      4
-    } else if (state %in% c(8, 18, 25)) {
-      3
-    } else if (state %in% c(7, 24)) {
-      2
-    } else{
-      1
-    }
-  }
-  
+
   fit <- rstan::sampling(
     mod,
     data = data,
@@ -452,7 +438,7 @@ run_model_m4 <- function(state, cases, pop) {
 
 #eg:
 
-run_model_m4(5, cases, mex_pop_mat_no0)  #State 5 (alphabetically) is Chiapas, check using mex_states_order
+run_model_m4(5, cases, mex_pop_mat_no0)  #State 5 (alphabetically) is Chiapas, check using mex_states_order (5 = Chiapas)
 
 chains_m4 <- vector(mode = "list", length = 32)
 
@@ -642,8 +628,7 @@ FOI_m4 <- vector(mode = "list", length = 32)
 for (i in 5:5) {
 #for(i in seq(1, 31)[-c(2, 6, 9, 10, 29)]){ this is all states
   
-  dim(chains_m4[[i]]$lam_t)[2]
-  
+  end_t <- dim(chains_m4[[i]]$lam_t)[2]
   
   lam_1_m4[[i]] <- data.frame(
     t = seq(1, end_t),
@@ -657,13 +642,13 @@ for (i in 5:5) {
   lam_4_m4[[i]] <-  lam_1_m4[[i]]
   FOI_m4[[i]] <-  lam_1_m4[[i]]
   
+  for (t in 1:end_t) {
+  
   lam_1_m4[[i]][t, 2:4] <-
     quantile(chains_m4[[i]]$lam_t[, t, 1] * chains_m4[[i]]$sigma_t[, t], c(0.5, 0.025, 0.975))
   lam_2_m4[[i]][t, 2:4] <-
     quantile(chains_m4[[i]]$lam_t[, t, 2] * chains_m4[[i]]$sigma_t[, t], c(0.5, 0.025, 0.975))
   
-  
-  for (t in 1:end_t) {
     if (i %in% c(11, 18, 24)) {
       lam_3_m4[[i]][t, 2:4] <- rep(NA, 3)
       lam_4_m4[[i]][t, 2:4] <- rep(NA, 3)
@@ -750,3 +735,368 @@ lam_df_m4 <- bind_rows(
   bind_rows(lam_4_m4),
   .id = "id"
 ) %>% rename(serotype = id) 
+
+#Extracting Model Fit#
+
+fit_1_m4 <- vector(mode = "list", length = 32)
+fit_2_m4 <- vector(mode = "list", length = 32)
+fit_3_m4 <- vector(mode = "list", length = 32)
+fit_4_m4 <- vector(mode = "list", length = 32)
+
+for (i in 5:5) {#for (i in seq(1, 30)[-c(2, 6, 9, 10, 29)]) {
+  cases_fit = if (i %in% c(1, 9, 13, 22)) {
+    array(cases[(i * 8), , ], dim = c(1, 16, 4))
+  } else if (i %in% c(3, 23, 31)) {
+    cases[((i * 8) - 1):(i * 8), , ]
+  } else if (i == 10) {
+    cases[((i - 1) * 8 + 1):((i - 1) * 8 + 2), , ]
+  } else if (i == 26) {
+    cases[((i * 8) - 2):(i * 8), , ]
+  } else if (i == 18) {
+    cases[((i * 8) - 5):((i * 8) - 2), , ]
+  } else if (i == 24) {
+    cases[((i - 1) * 8 + 2):((i * 8) - 2), , ]
+  } else if (i == 4) {
+    cases[((i * 8) - 4):(i * 8), , ]
+  } else if (i == 28) {
+    cases[((i - 1) * 8 + 1):((i * 8) - 3), , ]
+  } else if (i %in% c(8, 25)) {
+    cases[((i - 1) * 8 + 3):(i * 8), , ]
+  } else if (i == 11) {
+    cases[((i - 1) * 8 + 1):((i * 8) - 2), , ]
+  } else if (i == 7) {
+    cases[((i - 1) * 8 + 2):(i * 8), , ]
+  } else{
+    cases[((i - 1) * 8 + 1):(i * 8), , ]
+  }
+  
+  if (i %in% c(1, 9, 13, 22)) {
+    fit_1_m4[[i]] <- rbind(data.frame(), cases_fit[, , 1]) %>%
+      pivot_longer(c(1:16), names_to = "Age_Group", values_to = "Cases")
+    fit_2_m4[[i]] <- rbind(data.frame(), cases_fit[, , 2]) %>%
+      pivot_longer(c(1:16), names_to = "Age_Group", values_to = "Cases")
+    fit_3_m4[[i]] <- rbind(data.frame(), cases_fit[, , 3]) %>%
+      pivot_longer(c(1:16), names_to = "Age_Group", values_to = "Cases")
+    fit_4_m4[[i]] <- rbind(data.frame(), cases_fit[, , 4]) %>%
+      pivot_longer(c(1:16), names_to = "Age_Group", values_to = "Cases")
+  } else{
+    fit_1_m4[[i]] <- data.frame(cases_fit[, , 1]) %>%
+      pivot_longer(c(1:16), names_to = "Age_Group", values_to = "Cases")
+    fit_2_m4[[i]] <- data.frame(cases_fit[, , 2]) %>%
+      pivot_longer(c(1:16), names_to = "Age_Group", values_to = "Cases")
+    fit_3_m4[[i]] <- data.frame(cases_fit[, , 3]) %>%
+      pivot_longer(c(1:16), names_to = "Age_Group", values_to = "Cases")
+    fit_4_m4[[i]] <- data.frame(cases_fit[, , 4]) %>%
+      pivot_longer(c(1:16), names_to = "Age_Group", values_to = "Cases")
+  }
+  
+  fit_1_m4[[i]]$year = if (i %in% c(1, 9, 13, 22)) {
+    c(rep(8, nA))
+  } else if (i %in% c(3, 23, 31)) {
+    c(rep(7, nA), rep(8, nA))
+  } else if (i == 10) {
+    c(rep(1, nA), rep(2, nA))
+  } else if (i == 26) {
+    c(rep(6, nA), rep(7, nA), rep(8, nA))
+  } else if (i == 18) {
+    c(rep(3, nA), rep(4, nA), rep(5, nA), rep(6, nA))
+  } else if (i == 24) {
+    c(rep(2, nA), rep(3, nA), rep(4, nA), rep(5, nA), rep(6, nA))
+  } else if (i == 4) {
+    c(rep(4, nA), rep(5, nA), rep(6, nA), rep(7, nA), rep(8, nA))
+  } else if (i == 28) {
+    c(rep(1, nA), rep(2, nA), rep(3, nA), rep(4, nA), rep(5, nA))
+  } else if (i %in% c(8, 25)) {
+    c(rep(3, nA),
+      rep(4, nA),
+      rep(5, nA),
+      rep(6, nA),
+      rep(7, nA),
+      rep(8, nA))
+  } else if (i == 11) {
+    c(rep(1, nA),
+      rep(2, nA),
+      rep(3, nA),
+      rep(4, nA),
+      rep(5, nA),
+      rep(6, nA))
+  } else if (i == 7) {
+    c(rep(2, nA),
+      rep(3, nA),
+      rep(4, nA),
+      rep(5, nA),
+      rep(6, nA),
+      rep(7, nA),
+      rep(8, nA))
+  } else{
+    c(
+      rep(1, nA),
+      rep(2, nA),
+      rep(3, nA),
+      rep(4, nA),
+      rep(5, nA),
+      rep(6, nA),
+      rep(7, nA),
+      rep(8, nA)
+    )
+  }
+  
+  fit_2_m4[[i]]$year <- fit_1_m4[[i]]$year
+  fit_3_m4[[i]]$year <- fit_1_m4[[i]]$year
+  fit_4_m4[[i]]$year <- fit_1_m4[[i]]$year
+  
+  fit_1_m4[[i]][, c('pred', 'ciL', 'ciU')] <- NA
+  fit_2_m4[[i]][, c('pred', 'ciL', 'ciU')] <- NA
+  fit_3_m4[[i]][, c('pred', 'ciL', 'ciU')] <- NA
+  fit_4_m4[[i]][, c('pred', 'ciL', 'ciU')] <- NA
+  
+  fit_1_m4[[i]] <- as.data.frame(fit_1_m4[[i]])
+  fit_2_m4[[i]] <- as.data.frame(fit_2_m4[[i]])
+  fit_3_m4[[i]] <- as.data.frame(fit_3_m4[[i]])
+  fit_4_m4[[i]] <- as.data.frame(fit_4_m4[[i]])
+  
+  fit_1_m4[[i]]$Age_Group <- rep(
+    c(
+      "01-04 yrs",
+      "05-09 yrs",
+      "10-14 yrs",
+      "15-19 yrs",
+      "20-24 yrs",
+      "25-29 yrs",
+      "30-34 yrs",
+      "35-39 yrs",
+      "40-44 yrs",
+      "45-49 yrs",
+      "50-54 yrs",
+      "55-59 yrs",
+      "60-64 yrs",
+      "65-69 yrs",
+      "70-74 yrs",
+      "75+ yrs"
+    ),
+    dim(chains_m4[[i]]$Ecases)[2]
+  )
+  fit_2_m4[[i]]$Age_Group <- rep(
+    c(
+      "01-04 yrs",
+      "05-09 yrs",
+      "10-14 yrs",
+      "15-19 yrs",
+      "20-24 yrs",
+      "25-29 yrs",
+      "30-34 yrs",
+      "35-39 yrs",
+      "40-44 yrs",
+      "45-49 yrs",
+      "50-54 yrs",
+      "55-59 yrs",
+      "60-64 yrs",
+      "65-69 yrs",
+      "70-74 yrs",
+      "75+ yrs"
+    ),
+    dim(chains_m4[[i]]$Ecases)[2]
+  )
+  fit_3_m4[[i]]$Age_Group <- rep(
+    c(
+      "01-04 yrs",
+      "05-09 yrs",
+      "10-14 yrs",
+      "15-19 yrs",
+      "20-24 yrs",
+      "25-29 yrs",
+      "30-34 yrs",
+      "35-39 yrs",
+      "40-44 yrs",
+      "45-49 yrs",
+      "50-54 yrs",
+      "55-59 yrs",
+      "60-64 yrs",
+      "65-69 yrs",
+      "70-74 yrs",
+      "75+ yrs"
+    ),
+    dim(chains_m4[[i]]$Ecases)[2]
+  )
+  fit_4_m4[[i]]$Age_Group <- rep(
+    c(
+      "01-04 yrs",
+      "05-09 yrs",
+      "10-14 yrs",
+      "15-19 yrs",
+      "20-24 yrs",
+      "25-29 yrs",
+      "30-34 yrs",
+      "35-39 yrs",
+      "40-44 yrs",
+      "45-49 yrs",
+      "50-54 yrs",
+      "55-59 yrs",
+      "60-64 yrs",
+      "65-69 yrs",
+      "70-74 yrs",
+      "75+ yrs"
+    ),
+    dim(chains_m4[[i]]$Ecases)[2]
+  )
+  
+  ageG <- c(fit_1_m4[[i]]$Age_Group[1:16])
+  
+  time_steps <- if (i %in% c(1, 9, 13, 22)) {
+    c(8)
+  } else if (i %in% c(3, 23, 31)) {
+    c(7, 8)
+  } else if (i == 10) {
+    c(1, 2)
+  } else if (i == 26) {
+    c(6, 7, 8)
+  } else if (i == 18) {
+    c(3, 4, 5, 6)
+  } else if (i == 24) {
+    c(2, 3, 4, 5, 6)
+  } else if (i == 4) {
+    c(4, 5, 6, 7, 8)
+  } else if (i == 28) {
+    c(1, 2, 3, 4, 5)
+  } else if (i %in% c(8, 25)) {
+    c(3, 4, 5, 6, 7, 8)
+  } else if (i == 11) {
+    c(1, 2, 3, 4, 5, 6)
+  } else if (i == 7) {
+    c(2, 3, 4, 5, 6, 7, 8)
+  } else{
+    c(1, 2, 3, 4, 5, 6, 7, 8)
+  }
+  
+  end_t <- if (i %in% c(19, 24)) {
+    dim(chains_m4[[i]]$Ecases)[2]
+  }
+  else if (i == 5) {
+    dim(chains_m4[[i]]$Ecases)[2]
+  }
+  else if (i %in% c(4, 12, 16, 21)) {
+    dim(chains_m4[[i]]$Ecases)[2]
+  } else{
+    dim(chains_m4[[i]]$Ecases)[2]
+  }
+  
+  for (t in 1:end_t) {
+    for (a in 1:16) {
+      fit_1_m4[[i]][fit_1_m4[[i]]$year == time_steps[t] &
+                      fit_1_m4[[i]]$Age_Group == ageG[a], 4:6] <-
+        quantile(chains_m4[[i]]$Ecases[, t, 1, a], c(0.5, 0.025, 0.975))
+      fit_2_m4[[i]][fit_2_m4[[i]]$year == time_steps[t] &
+                      fit_2_m4[[i]]$Age_Group == ageG[a], 4:6] <-
+        quantile(chains_m4[[i]]$Ecases[, t, 2, a], c(0.5, 0.025, 0.975))
+      if (i %in% c(11, 18, 24)) {
+        fit_3_m4[[i]][fit_3_m4[[i]]$year == time_steps[t] &
+                        fit_3_m4[[i]]$Age_Group == ageG[a], 4:6] <- rep(NA, 3)
+        fit_4_m4[[i]][fit_4_m4[[i]]$year == time_steps[t] &
+                        fit_4_m4[[i]]$Age_Group == ageG[a], 4:6] <- rep(NA, 3)
+      }
+      else {
+        fit_3_m4[[i]][fit_3_m4[[i]]$year == time_steps[t] &
+                        fit_3_m4[[i]]$Age_Group == ageG[a], 4:6] <-
+          quantile(chains_m4[[i]]$Ecases[, t, 3, a], c(0.5, 0.025, 0.975))
+        if (i %in% c(5, 12, 20, 21, 23, 27, 30, 31)) {
+          fit_4_m4[[i]][fit_4_m4[[i]]$year == time_steps[t] &
+                          fit_4_m4[[i]]$Age_Group == ageG[a], 4:6] <-
+            quantile(chains_m4[[i]]$Ecases[, t, 4, a], c(0.5, 0.025, 0.975))
+        } else{
+          fit_4_m4[[i]][fit_4_m4[[i]]$year == time_steps[t] &
+                          fit_4_m4[[i]]$Age_Group == ageG[a], 4:6] <- rep(NA, 3)
+        }
+      }
+    }
+  }
+  
+  fit_1_m4[[i]]$Age_Group <- factor(
+    fit_1_m4[[i]]$Age_Group,
+    levels = c(
+      "01-04 yrs",
+      "05-09 yrs",
+      "10-14 yrs",
+      "15-19 yrs",
+      "20-24 yrs",
+      "25-29 yrs",
+      "30-34 yrs",
+      "35-39 yrs",
+      "40-44 yrs",
+      "45-49 yrs",
+      "50-54 yrs",
+      "55-59 yrs",
+      "60-64 yrs",
+      "65-69 yrs",
+      "70-74 yrs",
+      "75+ yrs"
+    )
+  )
+  fit_2_m4[[i]]$Age_Group <- factor(
+    fit_2_m4[[i]]$Age_Group,
+    levels = c(
+      "01-04 yrs",
+      "05-09 yrs",
+      "10-14 yrs",
+      "15-19 yrs",
+      "20-24 yrs",
+      "25-29 yrs",
+      "30-34 yrs",
+      "35-39 yrs",
+      "40-44 yrs",
+      "45-49 yrs",
+      "50-54 yrs",
+      "55-59 yrs",
+      "60-64 yrs",
+      "65-69 yrs",
+      "70-74 yrs",
+      "75+ yrs"
+    )
+  )
+  fit_3_m4[[i]]$Age_Group <- factor(
+    fit_3_m4[[i]]$Age_Group,
+    levels = c(
+      "01-04 yrs",
+      "05-09 yrs",
+      "10-14 yrs",
+      "15-19 yrs",
+      "20-24 yrs",
+      "25-29 yrs",
+      "30-34 yrs",
+      "35-39 yrs",
+      "40-44 yrs",
+      "45-49 yrs",
+      "50-54 yrs",
+      "55-59 yrs",
+      "60-64 yrs",
+      "65-69 yrs",
+      "70-74 yrs",
+      "75+ yrs"
+    )
+  )
+  fit_4_m4[[i]]$Age_Group <- factor(
+    fit_4_m4[[i]]$Age_Group,
+    levels = c(
+      "01-04 yrs",
+      "05-09 yrs",
+      "10-14 yrs",
+      "15-19 yrs",
+      "20-24 yrs",
+      "25-29 yrs",
+      "30-34 yrs",
+      "35-39 yrs",
+      "40-44 yrs",
+      "45-49 yrs",
+      "50-54 yrs",
+      "55-59 yrs",
+      "60-64 yrs",
+      "65-69 yrs",
+      "70-74 yrs",
+      "75+ yrs"
+    )
+  )
+}
+
+fit_m4 <- vector(mode = "list", length = 32)
+for(i in 5:5){#for (i in seq(1, 30)[-c(2, 6, 9, 10, 29)]) {
+  fit_m4[[i]] <- bind_rows(fit_1_m4[[i]], fit_2_m4[[i]], fit_3_m4[[i]], fit_4_m4[[i]], .id = "id") %>% mutate(id = as.factor(id)) %>% rename(serotype = id)
+}
