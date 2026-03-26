@@ -10,6 +10,8 @@ These models are:
 
 The models are run using the "rstan" package, and functions from the "tidyverse" package are needed to perform some of the data manipulation required to format the case and population data to then run the models.
 
+Contained within "...diagnostic outputs.zip" files are the trace plots for each parameter for each modelled state from Models 1, 2 and 4 (the models used to generate results presented in the paper), which can be used to visually assess model convergence.
+
 Provided within the "Figure Code" folder are the .R files that were used to generate the figures presented in the Results section of the paper, Fig1-7. Whilst the aggregated case data required to run the models has been provided, the raw case data used to generate this file, which is needed for the data analysis parts of the figures (Fig 1, Fig 2, and parts of Fig 3 and Fig 6) needs to be accessed online for the years 2020-2023 (available at: https://www.gob.mx/salud/documentos/datos-abiertos-bases-historicas-de-enfermedades-transmitidas-por-vector) and by request from INAI (Instituto Nacional de Acceso a la Información, folio 330026924000362) for years 2016-2019.
 
 [1] Imai N, Dorigatti I, Cauchemez S, Ferguson NM. Estimating Dengue Transmission Intensity from Case-Notification Data from Multiple Countries. PLoS Negl Trop Dis. 2016;10(7):e0004833. Epub 20160711. doi: 10.1371/journal.pntd.0004833. PubMed PMID: 27399793; PubMed Central PMCID: PMCPMC4939939.
