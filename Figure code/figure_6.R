@@ -268,7 +268,7 @@ f6_p4 <- ggplot(oax_data_figure_6_p4, aes(x = Age_Group , y = Cases)) +
   alpha = 0.2) +
   scale_fill_met_d(name = "Egypt") +
   scale_color_met_d(name = "Egypt") +
-  labs(fill = "Serotype", colour = "Serotype", x = "Year") +
+  labs(fill = "DENV Serotype", colour = "DENV Serotype", x = "Year") +
   ylim(0, 2500) +
   theme(
     strip.background = element_rect(fill = NA, color = "white"),
