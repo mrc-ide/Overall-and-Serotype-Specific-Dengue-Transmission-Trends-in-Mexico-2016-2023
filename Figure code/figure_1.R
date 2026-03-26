@@ -367,7 +367,7 @@ sero_short <- ggplot(aes(
   y = prop,
   colour = as.factor(RESULTADO_PCR)
 ),
-data = sero_plot_mex %>% mutate(RESULTADO_PCR = paste0("DENV", RESULTADO_PCR))) +
+data = sero_plot_mex %>% mutate(RESULTADO_PCR = paste0("DENV-", RESULTADO_PCR))) +
   geom_line(size = 1) +
   geom_point(size = 1) +
   theme_classic() +
