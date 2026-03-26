@@ -1,5 +1,5 @@
 //--- Time-varying dengue catalytic model ---//
-// assumes constant endemic FOI prior to data
+// assumes time-varying FOI prior to data
 // assumes complete immunity after 2nd infection
 // assumes equal transmissability of 4 serotypes
 
