@@ -545,7 +545,7 @@ for (i in 5:5) {
         quantile(chains_m4[[i]]$lam_H[, 3, 4] * chains_m4[[i]]$sigma_H[, 3],
                  c(0.5, 0.025, 0.975))
       lam_H_4_4_m4[[i]] <-
-        quantile(chains_m4[[i]]$lam_H[, 4, 4] * chains_m4[[i]]$sigma_H[, 5],
+        quantile(chains_m4[[i]]$lam_H[, 4, 4] * chains_m4[[i]]$sigma_H[, 4],
                  c(0.5, 0.025, 0.975))
       lam_H_4_5_m4[[i]] <-
         quantile(chains_m4[[i]]$lam_H[, 5, 4] * chains_m4[[i]]$sigma_H[, 5],
